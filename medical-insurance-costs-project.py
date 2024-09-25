@@ -15,7 +15,7 @@ import pandas as pd
 # Reading CSV file into a DataFrame
 df = pd.read_csv('insurance.csv')
 
-# You can now access columns directly from the DataFrame
+# Accessing columns directly from the DataFrame
 ages = df['age']
 sexes = df['sex']
 bmis = df['bmi']

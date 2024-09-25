@@ -8,168 +8,70 @@ Project Objectives:
 - Optional: Make predictions about a dataset’s features based on your findings
 '''
 
-import csv
 import numpy as np
-import pandas as pdpip
+import pandas as pd
 
 # Importing the dataset
+# Reading CSV file into a DataFrame
+df = pd.read_csv('insurance.csv')
 
-# Openning the CSV file in read mode
-with open('insurance.csv', newline='') as csvfile:
-    # Creating a CSV reader object
-    #reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-    
-    # Reading and printing each row
-    #for row in reader:
-    #    print(', '.join(row))
-    reader = csv.DictReader(csvfile)
-
-    # Saving columns by storing them in variables
-    ages = []
-    sexes = []
-    bmis = []
-    children = []
-    smokers = []
-    regions = []
-    charges = []
-
-    for row in reader:
-        try:
-            # Append valid data to the lists
-            ages.append(row['age'])
-            sexes.append(row['sex'])
-            bmis.append(row['bmi'])
-            children.append(int(row['children']))
-            smokers.append(row['smoker'])
-            regions.append(row['region'])
-            charges.append(float(row['charges']))
-        except ValueError as e:
-            # Print a warning message for invalid data
-            print(f"Warning: Skipping row due to invalid data: {e}")
+# You can now access columns directly from the DataFrame
+ages = df['age']
+sexes = df['sex']
+bmis = df['bmi']
+children = df['children']
+smokers = df['smoker']
+regions = df['region']
+charges = df['charges']
 
 
 # Basic Descriptive Analysis
 
-# How many women and how many men?
+# 1. How many women and how many men?
+count_women = df[df['sex'] == 'female'].shape[0]
+count_men = df[df['sex'] == 'male'].shape[0]
 
-def count_sexes(sex):
-    count = sexes.count(sex)
-    return count
-
-count_women = count_sexes('female')
-count_men = count_sexes('male')
-
-# Testing
 print(f'Number of women: {count_women}')
 print(f'Number of men: {count_men}')
 print(f'There are {count_men - count_women} more men than women.')
-
 print('-' * 40)
 
 
-# Average number of children
-
-def calculate_average_children(children):
-    total_children = sum(children)
-    number_of_entries = len(children)
-    # Avoid division by zero
-    if number_of_entries == 0:
-        return 0
-    average_children = total_children / number_of_entries
-    return average_children
-
-# Testing
-average_children = calculate_average_children(children)
+# 2. Average number of children
+average_children = df['children'].mean()
 print(f'Average number of children: {average_children:.2f}')
-
 print('-' * 40)
 
 
-# What is the average charge for each region?
-
-def calculate_average_charges_per_region(regions, charges):
-    # Check if lengths of regions and charges match
-    if len(regions) != len(charges):
-        print(f"Warning: Mismatch in data length. Regions: {len(regions)}, Charges: {len(charges)}")
-        return None
-
-    charges_per_region = {}
-    region_counts = {}
-
-    # Populating the dictionaries
-    for region, charge in zip(regions, charges):
-        if region in charges_per_region:
-            charges_per_region[region] += charge
-            region_counts[region] += 1
-        else:
-            charges_per_region[region] = charge
-            region_counts[region] = 1
-
-    # Calculating and printing average charges per region
-    average_charges = {}
-    for region in charges_per_region:
-        average_charges[region] = charges_per_region[region] / region_counts[region]
-        print(f'Average charge for {region}: ${average_charges[region]:.2f}')
-
-    return average_charges
-
-# Testing
-avg_charges_per_region = calculate_average_charges_per_region(regions, charges)
-
-print('-' * 40)
-
-# Accessing a specific region's average charge
-specific_region = 'southwest'
-if avg_charges_per_region and specific_region in avg_charges_per_region:
-    print(f"Average charge for {specific_region}: ${avg_charges_per_region[specific_region]:.2f}")
-else:
-    print(f"{specific_region} is not found in the region list.")
-
+# 3. What is the average charge for each region?
+average_charges_per_region = df.groupby('region')['charges'].mean()
+print(average_charges_per_region)
 print('-' * 40)
 
 
-# How does the average BMI differ between smokers and non-smokers?
+# 4. How does the average BMI differ between smokers and non-smokers?
+average_bmi_smokers = df[df['smoker'] == 'yes']['bmi'].mean()
+average_bmi_non_smokers = df[df['smoker'] == 'no']['bmi'].mean()
 
-def calculate_average_bmi_by_smoking_status(bmis, smokers):
-    # Separating smokers and non-smokers
-    smoker_bmis = []
-    non_smoker_bmis = []
-
-    # Iterating through zipped bmis and smokers lists
-    for bmi, smoker in zip(bmis, smokers):
-        # If it's a smoker, add their bmi to the smoker_bmis list
-        if smoker == 'yes':
-            smoker_bmis.append(float(bmi)) # Converting to float
-        # Otherwise, add it to the non_smoker_bmis list
-        else:
-            non_smoker_bmis.append(float(bmi))
-    
-    # Calculating average BMI for smokers, handling cases where there may be no smokers in the dataset
-    avg_bmi_smokers = sum(smoker_bmis) / len(smoker_bmis) if smoker_bmis else 0
-
-    # Calculating average BMI for non-smokers, handling cases where there may be no non-smoker in the dataset
-    avg_bmi_non_smokers = sum(non_smoker_bmis) / len(non_smoker_bmis) if non_smoker_bmis else 0
-
-    return avg_bmi_smokers, avg_bmi_non_smokers
-
-# Testing
-avg_bmi_smokers, avg_bmi_non_smokers = calculate_average_bmi_by_smoking_status(bmis, smokers)
-
-print(f'Average BMI for smokers: {avg_bmi_smokers:.2f}')
-print(f'Average BMI for non-smokers: {avg_bmi_non_smokers:.2f}')
-print(f'Difference between average BMI: {abs(avg_bmi_smokers - avg_bmi_non_smokers):.2f}') # Using the abs() function to ensure the result is always positive
-        
+print(f'Average BMI for smokers: {average_bmi_smokers:.2f}')
+print(f'Average BMI for non-smokers: {average_bmi_non_smokers:.2f}')
+print(f'Difference between average BMI: {abs(average_bmi_smokers - average_bmi_non_smokers):.2f}')
 print('-' * 40)
 
-# What is the distribution of ages in the dataset?
-# What is the average age for someone who has at least one child in this dataset?
+
+# 5.  What is the distribution of ages in the dataset?
+# 6. What is the average age for someone who has at least one child in this dataset?
 
 
 
 
 # Correlation and Relationships
 
-# Is there a correlation between BMI and charges?
+# 7. Is there a correlation between BMI and charges?
+correlation_bmi_charges = df['bmi'].corr(df['charges'])
+print(f'Correlation between BMI and charges: {correlation_bmi_charges:.2f}')
+print('-' * 40)
+
 # How does the number of children affect insurance charges?
 # Is there a significant difference in charges between smokers and non-smokers?
 # Do charges vary significantly by sex?

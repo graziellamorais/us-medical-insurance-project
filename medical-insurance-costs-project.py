@@ -8,22 +8,13 @@ Project Objectives:
 - Optional: Make predictions about a dataset’s features based on your findings
 '''
 
+import csv
 import numpy as np
 import pandas as pd
 
 # Importing the dataset
 # Reading CSV file into a DataFrame
 df = pd.read_csv('insurance.csv')
-
-# Accessing columns directly from the DataFrame
-ages = df['age']
-sexes = df['sex']
-bmis = df['bmi']
-children = df['children']
-smokers = df['smoker']
-regions = df['region']
-charges = df['charges']
-
 
 # Basic Descriptive Analysis
 
